@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shakeagain · Estructura de células</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#9B0000; --red-hot:#ED1C24; --ink:#141414; --white:#FFFFFF;
+    --g200:#E4E4E7; --g300:#C7C7CC; --g400:#9E9E9E; --g600:#6A6A70;
+    --surf:rgba(255,255,255,.035); --surf2:rgba(255,255,255,.055); --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.14);
+    --legacy:#5B8DEF; --delorean:#7E6BF0; --motor:#22B8A6; --excel:#F0A029; --octu:#ED7CA6; --impulso:#9BCB55;
+    --display:'Sora',system-ui,-apple-system,sans-serif; --body:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--white);-webkit-font-smoothing:antialiased;line-height:1.5;
+    background:radial-gradient(120% 90% at 92% -5%,rgba(155,0,0,.32),transparent 55%),
+               radial-gradient(80% 70% at 0% 100%,rgba(237,28,36,.08),transparent 60%),var(--ink);
+    min-height:100vh;padding:40px clamp(20px,4vw,54px) 70px}
+  .wrap{max-width:1380px;margin:0 auto}
+
+  /* header */
+  .wordmark{font-family:var(--display);font-weight:800;letter-spacing:.02em;font-size:14px;display:flex;align-items:center;gap:9px;color:#fff;margin-bottom:26px}
+  .wordmark b{color:var(--red-hot)}
+  .dot-mark{width:9px;height:9px;border-radius:50%;background:var(--red-hot)}
+  .eyebrow{font-family:var(--display);font-weight:600;letter-spacing:.22em;text-transform:uppercase;font-size:12px;color:var(--red-hot);display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .eyebrow::before{content:"";width:30px;height:2px;background:var(--red-hot)}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;gap:26px;flex-wrap:wrap;margin-bottom:30px}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.4vw,50px);letter-spacing:-.02em;line-height:1}
+  .sub{color:var(--g400);font-size:14px;margin-top:14px;font-family:var(--display);font-weight:500;letter-spacing:.02em}
+  .sub b{color:var(--g200);font-weight:600}
+
+  .toolbar{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .lg{display:flex;align-items:center;gap:8px;color:var(--g400);font-size:12.5px;font-family:var(--display);font-weight:500}
+  .lg .sq{width:11px;height:11px;border-radius:3px}
+  .lg .own{background:var(--g300)}
+  .lg .cr{color:var(--red-hot);font-weight:700}
+  .tgl{display:inline-flex;align-items:center;gap:10px;background:var(--surf);border:1px solid var(--line2);border-radius:999px;padding:9px 16px;color:var(--g300);cursor:pointer;transition:.18s;font-family:var(--display);font-weight:600;font-size:12.5px}
+  .tgl:hover{border-color:rgba(237,28,36,.6);color:#fff}
+  .tgl.on{background:rgba(237,28,36,.12);border-color:var(--red-hot);color:#fff}
+  .tgl .sw{width:28px;height:16px;border-radius:999px;background:rgba(255,255,255,.16);position:relative;transition:.18s}
+  .tgl .sw::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--g300);transition:.18s}
+  .tgl.on .sw{background:var(--red-hot)}
+  .tgl.on .sw::after{left:14px;background:#fff}
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
+  .card{background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:20px 21px 20px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--ac)}
+  .chead{display:flex;align-items:center;gap:11px;margin-bottom:2px}
+  .chead .dot{width:12px;height:12px;border-radius:50%;background:var(--ac);flex:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--ac) 18%,transparent)}
+  .chead .nm{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em}
+  .badge{font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:4px 9px;border-radius:7px;margin-left:auto}
+  .badge.warn{background:rgba(240,160,41,.14);color:var(--excel);border:1px solid rgba(240,160,41,.35)}
+  .badge.tech{background:rgba(155,203,85,.13);color:var(--impulso);border:1px solid rgba(155,203,85,.35)}
+  .cmeta{font-family:var(--display);font-size:11px;color:var(--g600);letter-spacing:.05em;margin-bottom:16px;font-weight:500}
+
+  .lab{font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--g600);margin:16px 0 9px;display:flex;align-items:center;gap:10px}
+  .lab::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .roster{display:flex;flex-direction:column;gap:5px}
+  .role{display:flex;gap:10px;font-size:13.5px;align-items:baseline}
+  .role .rl{font-family:var(--display);font-size:10.5px;font-weight:600;letter-spacing:.02em;color:var(--ac);flex:none;min-width:82px;text-transform:lowercase;opacity:.92}
+  .role .pp,.as .pp{display:flex;flex-wrap:wrap;gap:3px 8px;color:#fff}
+
+  .accts{display:flex;flex-direction:column;gap:11px}
+  .acct{border-left:2px solid var(--line2);padding-left:12px}
+  .acct .an{font-family:var(--display);font-size:13.5px;font-weight:600;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tagmini{font-family:var(--display);font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line2);color:var(--g400);border-radius:5px;padding:1px 6px}
+  .assigns{display:flex;flex-wrap:wrap;gap:3px 14px}
+  .as{font-size:12px;display:flex;gap:6px;align-items:baseline}
+  .as .rl{font-family:var(--display);font-size:9.5px;font-weight:600;letter-spacing:.02em;color:var(--g600);text-transform:lowercase}
+
+  /* person atoms */
+  .p{white-space:nowrap;transition:opacity .22s,color .22s}
+  .p.x{color:var(--red-hot);font-weight:600;border-bottom:1px dotted color-mix(in srgb,var(--red-hot) 60%,transparent)}
+  .p.x .ar{font-size:9px;vertical-align:1px;margin-left:1px}
+  .p.ext{color:var(--g400);font-style:italic}
+  .p.mut{color:var(--g400);font-size:11px;font-style:italic}
+
+  /* cross-in block */
+  .xblk{margin-top:14px;background:rgba(237,28,36,.06);border:1px solid rgba(237,28,36,.28);border-radius:12px;padding:11px 13px}
+  .xblk .xlab{font-family:var(--display);font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--red-hot);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+  .xblk .xlab .ar{font-size:11px}
+  .xchips{display:flex;flex-wrap:wrap;gap:6px}
+  .xchip{font-size:11.5px;background:rgba(237,28,36,.09);border:1px solid rgba(237,28,36,.22);border-radius:7px;padding:3px 9px;color:#fff;white-space:nowrap}
+  .xchip em{font-style:normal;color:var(--g400);font-size:10px;margin-left:5px}
+  .owncell{margin-top:14px;font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--impulso);display:flex;align-items:center;gap:8px}
+  .owncell::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--impulso)}
+  .lendout{margin-top:14px;font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.03em;color:#E7B94E;display:flex;align-items:center;gap:8px}
+  .lendout .ar{font-size:12px}
+  .lendout b{color:#fff;font-weight:600}
+
+  .note{font-size:12px;color:var(--g300);margin-top:14px;padding-top:12px;border-top:1px solid var(--line);line-height:1.55}
+  .note b{color:var(--red-hot);font-weight:600}
+
+  /* master cross panel */
+  .crosswrap{margin-top:40px;background:linear-gradient(180deg,rgba(237,28,36,.07),transparent 55%),var(--surf);border:1px solid rgba(237,28,36,.3);border-radius:20px;padding:26px clamp(20px,3vw,30px) 28px}
+  .crosswrap .eyebrow{margin-bottom:12px}
+  .crosswrap h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em}
+  .cx-sub{font-size:13.5px;color:var(--g300);margin:10px 0 22px;max-width:760px;line-height:1.55}
+  .cx-sub b{color:#fff}
+  .cxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .cx{background:var(--surf2);border:1px solid var(--line);border-radius:13px;padding:15px 16px;transition:.2s}
+  .cx.hot{border-color:var(--red-hot);box-shadow:0 0 0 1px rgba(237,28,36,.3)}
+  .cx .cxh{display:flex;align-items:baseline;gap:9px;margin-bottom:11px;flex-wrap:wrap}
+  .cx .cxn{font-family:var(--display);font-weight:700;font-size:15px;color:var(--red-hot)}
+  .cx .cxr{font-family:var(--display);font-size:10.5px;color:var(--g400);letter-spacing:.03em;font-weight:500}
+  .cx .flow{display:flex;flex-wrap:wrap;gap:7px;align-items:center;font-size:11.5px}
+  .cx .base{font-family:var(--display);font-size:10px;color:var(--g400);letter-spacing:.05em}
+  .cx .arw{color:var(--red-hot);font-weight:700}
+  .chip{font-size:11px;padding:4px 10px;border-radius:7px;background:var(--surf);border:1px solid var(--line2);color:#fff;white-space:nowrap;display:inline-flex;align-items:center;gap:7px;font-weight:500}
+  .chip .cd{width:7px;height:7px;border-radius:50%}
+
+  /* highlight mode */
+  body.hl .card .roster,body.hl .card .cmeta,body.hl .card .note{opacity:.32;transition:opacity .22s}
+  body.hl .p:not(.x){opacity:.22}
+  body.hl .role .rl,body.hl .as .rl,body.hl .acct .an,body.hl .lab,body.hl .tagmini{opacity:.3}
+  body.hl .acct{border-left-color:rgba(255,255,255,.06)}
+  body.hl .card .lab.keep{opacity:1}
+  body.hl .p.x{opacity:1}
+
+  footer{margin-top:34px;font-family:var(--display);font-size:11.5px;color:var(--g600);letter-spacing:.04em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;border-top:1px solid var(--line);padding-top:18px;font-weight:500}
+
+  @media (max-width:600px){
+    body{padding:30px 16px 54px}
+    .role .rl{min-width:70px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark"><span class="dot-mark"></span>SHAKE<b>AGAIN</b></div>
+  <div class="eyebrow">Operaciones · Estructura</div>
+  <div class="head">
+    <div>
+      <h1>Mapa de células</h1>
+      <div class="sub"><b id="nCel">6</b> células · <b id="nAcc">–</b> cuentas · <b id="nCross">10</b> perfiles cross</div>
+    </div>
+    <div class="toolbar">
+      <div class="lg"><span class="sq own"></span>perfil propio</div>
+      <div class="lg"><span class="cr">✕</span> cross · desde otra célula</div>
+      <button class="tgl" id="tgl"><span class="sw"></span>Resaltar cruces</button>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="crosswrap">
+    <div class="eyebrow">Transversales</div>
+    <h2>Perfiles cross</h2>
+    <p class="cx-sub">Personas cuya <b>célula primaria es otra</b> y hoy suman como perfil cross en estas cuentas. La <b>base</b> marca su célula de origen; las flechas, a qué otras células y cuentas le aportan.</p>
+    <div class="cxgrid" id="cxgrid"></div>
+  </div>
+
+  <footer>
+    <span>Shake Again · 2026 · Client Operations — mapa de células</span>
+    <span id="stamp"></span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const C={legacy:'var(--legacy)',delorean:'var(--delorean)',motor:'var(--motor)',excel:'var(--excel)',octu:'var(--octu)',impulso:'var(--impulso)'};
+  const CN={legacy:'Legacy',delorean:'Delorean',motor:'Motorcito',excel:'3xcel-entes',octu:'Octupus',impulso:'Impulso'};
+
+  // person atom: string (propio) | {n, x:cross, ext:externo/freelo, mut:nota}
+  function P(n,o){o=o||{};return {n:n,x:!!o.x,ext:!!o.ext,mut:!!o.mut};}
+
+  const cells=[
+    {key:'legacy',name:'Legacy',ac:C.legacy,
+     native:[['account','Laury'],['content','Simon'],['design',['Gera','Renny']]],
+     accts:[
+       {n:'Fryma',t:[['account','Laury'],['design','Renny'],['content','Simon'],['medios',[P('Nico',{x:1}),P('Brian',{x:1})]],['email mkt',[P('Tita',{x:1})]]]},
+       {n:"Kiehl's",t:[['account','Laury'],['design','Renny'],['content','Simon']]},
+       {n:'Upro',t:[['account','Laury'],['content+design','Gera'],['comunidad',[P('Tita',{x:1})]],['creatividad',[P('Cisco',{x:1})]]]},
+       {n:'Shakeagain Growth',t:[['account','Laury'],['design','Renny'],['content+email','Simon']]},
+     ],
+     crossIn:[{n:'Nico + Brian',from:'Delorean'},{n:'Tita',from:'Motorcito'},{n:'Cisco',from:'flotante'}],
+     note:'<b>Nico + Brian</b> (medios, base en Delorean) entran solo en Fryma. <b>Tita</b> suma desde Motorcito (comunidad en Upro y email mkt en Fryma) y <b>Cisco</b> aporta creatividad en Upro.'},
+
+    {key:'delorean',name:'Delorean',ac:C.delorean,badge:{t:'sin AM propio',c:'warn'},
+     native:[['medios',['Nico','Brian']],['social · content','Shima']],
+     accts:[
+       {n:'Renault',noam:1,t:[['medios',['Brian','Nico']]]},
+       {n:'Iunigo',t:[['account',[P('Mauro',{x:1})]],['medios',['Nico','Brian']],['creative dir.',[P('Cisco',{x:1})]],['design',[P('Eli',{x:1})]],['social','Shima']]},
+       {n:'Grupo Garden',noam:1,t:[['medios',['Brian','Nico']]]},
+       {n:'San Cristóbal',t:[['account',[P('Mauro',{x:1})]],['tech',[P('Externo',{ext:1})]]]},
+       {n:'Intramed',noam:1,t:[['medios',['Brian','Nico']]]},
+       {n:'Optaris / Deyel',noam:1,t:[['medios',['Brian','Nico']]]},
+       {n:'Br · Unilever Profesional',t:[['pm+content',[P('Shima',{mut:0})]],['design',[P('Daro',{x:1})]]]},
+     ],
+     crossIn:[{n:'Mauro',from:'Impulso'},{n:'Cisco',from:'flotante'},{n:'Eli',from:'Motorcito'},{n:'Daro',from:'Motorcito'}],
+     note:'Célula <b>sin AM propio</b>: el account lo cubre <b>Mauro</b> (Impulso) solo en Iunigo y San Cristóbal. Diseño y creatividad entran cross (<b>Eli</b>, <b>Daro</b>, <b>Cisco</b>). <b>Shima</b> hace PM+content en Unilever.'},
+
+    {key:'motor',name:'Motorcito Heladero',ac:C.motor,
+     native:[['account','Marlene'],['content+design','Eli'],['content','Tita'],['design','Daro']],
+     accts:[
+       {n:'Dietrich',t:[['account','Marlene'],['design+content','Eli'],['creative dir.',[P('Cisco',{x:1})]],['medios',[P('Bren',{x:1}),P('Lu',{x:1})]]]},
+       {n:'Lancôme',t:[['account','Marlene'],['design','Daro'],['content','Tita']]},
+     ],
+     crossIn:[{n:'Cisco',from:'flotante'},{n:'Bren + Lu',from:'Octupus'}],
+     note:'Equipo propio: <b>Marlene</b> (AM), <b>Eli</b> (content+design), <b>Tita</b> (content) y <b>Daro</b> (design). Lo único que entra cross en Dietrich es <b>Bren + Lu</b> (medios de Octupus) y <b>Cisco</b> (creative director).'},
+
+    {key:'excel',name:'3xcel-entes',ac:C.excel,
+     native:[['account','Jes'],['medios',['Haru','Kathy']]],
+     accts:[
+       {n:'Landmark',t:[['account','Jes'],['medios',['Haru','Kathy']]]},
+       {n:'Compra Beauty',t:[['account','Jes'],['design',[P('Gera',{x:1})]],['content+email',[P('Shima',{x:1})]]]},
+     ],
+     crossIn:[{n:'Gera',from:'Legacy'},{n:'Shima',from:'Delorean'}],
+     note:'Landmark corre con equipo propio (<b>Jes</b> + <b>Haru/Kathy</b>). Compra Beauty se arma 100% con cross: <b>Gera</b> (Legacy) en diseño y <b>Shima</b> (Delorean) en content+email.'},
+
+    {key:'octu',name:'Octupus',ac:C.octu,
+     native:[['account',[P('Mica',{mut:0})]],['paid media',['Lu','Bren']]],
+     accts:[
+       {n:'Digital Sports',t:[['account','Mica'],['medios',['Lu','Bren']]]},
+       {n:'Bonvivir',t:[['account','Mica'],['medios',['Lu','Bren']]]},
+       {n:'City Center',t:[['account','Mica'],['medios',['Mica',P('· apoyo Lu o Bren s/ disponibilidad',{mut:1})]]]},
+       {n:'Banco Atlas',t:[['account','Mica'],['medios',['Mica',P('· apoyo Lu o Bren s/ disponibilidad',{mut:1})]]]},
+       {n:'Muresco',t:[['account','Mica'],['medios',['Mica',P('· apoyo Lu o Bren s/ disponibilidad',{mut:1})]]]},
+       {n:'La Europea',t:[['account','Mica'],['medios',['Mica',P('· apoyo Lu o Bren s/ disponibilidad',{mut:1})]]]},
+       {n:'Kuaiet',t:[['account','Mica'],['medios',['Mica',P('(AM + medios) · apoyo Lu o Bren',{mut:1})]]]},
+       {n:'Jual',freelo:1,t:[['gestión',[P('Freelance',{ext:1})]]]},
+     ],
+     crossIn:[],crossOut:[{n:'Bren + Lu',to:'Motorcito'}],
+     note:'<b>Mica</b> es AM de todas las cuentas y además hace medios en City Center, Banco Atlas, Muresco, La Europea y Kuaiet. Lu y Bren cubren Digital Sports y Bonvivir, y dan apoyo flexible al resto según disponibilidad. Bren y Lu además prestan medios a Motorcito (Dietrich). Jual se gestiona con un freelo.'},
+
+    {key:'impulso',name:'Impulso',ac:C.impulso,badge:{t:'tech',c:'tech'},
+     native:[['account','Mauro'],['developers',['Aníbal','Ivan','Mati','Lola']]],
+     accts:[
+       {n:'Bonjour Lulú',t:[['account','Mauro'],['developer',['Aníbal','Ivan']]]},
+       {n:'Acrílicos Mesch',t:[['account','Mauro'],['developer',['Aníbal','Ivan']]]},
+       {n:'Prendarios',t:[['account','Mauro'],['developer',['Ivan','Mati']]]},
+       {n:'FMA',t:[['account','Mauro'],['developer','Ivan']]},
+       {n:'Tercer Tiempo',t:[['account','Mauro'],['developer',['Aníbal','Ivan']]]},
+       {n:'Qualia Manuales',t:[['account','Mauro'],['developer',['Ivan','Aníbal']]]},
+       {n:'Qualia Texto Plano',t:[['account','Mauro'],['developer','Aníbal']]},
+       {n:'Qualia Desarrollo',t:[['account','Mauro'],['developer',['Ivan','Mati','Lola']]]},
+       {n:'Zeva Cosmetics',t:[['account','Mauro'],['developer',['Ivan','Mati']]]},
+     ],
+     crossIn:[],crossOut:[{n:'Mauro',to:'Delorean'}],
+     note:'Célula tech con equipo propio. <b>Mauro</b> es el AM base de Impulso (y presta account cross a Delorean).'},
+  ];
+
+  const crosses=[
+    {n:'Cisco',r:'creative director',base:'—',to:[['legacy','Upro'],['delorean','Iunigo'],['motor','Dietrich']],top:1},
+    {n:'Nico + Brian',r:'medios',base:'delorean',to:[['legacy','Fryma']]},
+    {n:'Mauro',r:'account',base:'impulso',to:[['delorean','Iunigo · San Cristóbal']]},
+    {n:'Eli',r:'content / design',base:'motor',to:[['delorean','Iunigo']]},
+    {n:'Tita',r:'content / comunidad / email',base:'motor',to:[['legacy','Upro · Fryma']]},
+    {n:'Daro',r:'design',base:'motor',to:[['delorean','Br·Unilever']]},
+    {n:'Shima',r:'content / social / pm',base:'delorean',to:[['excel','Compra Beauty']]},
+    {n:'Gera',r:'design',base:'legacy',to:[['excel','Compra Beauty']]},
+    {n:'Bren',r:'paid',base:'octu',to:[['motor','Dietrich']]},
+    {n:'Lu',r:'paid',base:'octu',to:[['motor','Dietrich']]},
+  ];
+
+  function person(x){
+    const p=(typeof x==='string')?{n:x}:x;
+    let cls='p'; if(p.x)cls+=' x'; if(p.ext)cls+=' ext'; if(p.mut)cls+=' mut';
+    let inner=p.n+(p.x?'<span class="ar">✕</span>':'');
+    return '<span class="'+cls+'">'+inner+'</span>';
+  }
+  function people(v){return (Array.isArray(v)?v:[v]).map(person).join(' ');}
+  function roleRow(rl,v){return '<div class="role"><span class="rl">'+rl+'</span><span class="pp">'+people(v)+'</span></div>';}
+  function assign(rl,v){return '<span class="as"><span class="rl">'+rl+'</span><span class="pp">'+people(v)+'</span></span>';}
+
+  function cellCard(c){
+    let h='<div class="card" style="--ac:'+c.ac+'">';
+    h+='<div class="chead"><span class="dot"></span><span class="nm">'+c.name+'</span>';
+    if(c.badge)h+='<span class="badge '+c.badge.c+'">'+c.badge.t+'</span>';
+    h+='</div>';
+    h+='<div class="cmeta">'+c.accts.length+' cuentas · equipo propio de '+c.native.reduce((s,r)=>s+(Array.isArray(r[1])?r[1].length:1),0)+'</div>';
+
+    h+='<div class="lab">Equipo · célula</div><div class="roster">';
+    c.native.forEach(r=>h+=roleRow(r[0],r[1]));
+    h+='</div>';
+
+    h+='<div class="lab">Cuentas · quién trabaja</div><div class="accts">';
+    c.accts.forEach(a=>{
+      h+='<div class="acct"><div class="an">'+a.n;
+      if(a.noam)h+='<span class="tagmini">sin account</span>';
+      if(a.pend)h+='<span class="tagmini">detalle pendiente</span>';
+      if(a.freelo)h+='<span class="tagmini">freelo</span>';
+      h+='</div>';
+      if(a.t){h+='<div class="assigns">';a.t.forEach(t=>h+=assign(t[0],t[1]));h+='</div>';}
+      h+='</div>';
+    });
+    h+='</div>';
+
+    if(c.crossIn&&c.crossIn.length){
+      h+='<div class="xblk"><div class="xlab"><span class="ar">✕</span>Cross · suman desde otra célula</div><div class="xchips">';
+      c.crossIn.forEach(x=>h+='<span class="xchip">'+x.n+'<em>'+x.from+'</em></span>');
+      h+='</div></div>';
+    }
+    if(c.crossOut&&c.crossOut.length){
+      h+='<div class="lendout"><span class="ar">↗</span>Equipo propio · comparte '+c.crossOut.map(o=>'<b>'+o.n+'</b> → '+o.to).join(' · ')+'</div>';
+    }
+    if((!c.crossIn||!c.crossIn.length)&&(!c.crossOut||!c.crossOut.length)){
+      h+='<div class="owncell">Equipo 100% propio · sin perfiles cross</div>';
+    }
+
+    if(c.note)h+='<div class="note">'+c.note+'</div>';
+    h+='</div>';
+    return h;
+  }
+
+  function crossCard(x){
+    let h='<div class="cx'+(x.top?' hot':'')+'">';
+    h+='<div class="cxh"><span class="cxn">'+x.n+'</span><span class="cxr">'+x.r+'</span></div><div class="flow">';
+    if(x.base!=='—')h+='<span class="chip"><span class="cd" style="background:'+C[x.base]+'"></span>'+CN[x.base]+'</span>';
+    else h+='<span class="base">flotante</span>';
+    h+='<span class="arw">→</span>';
+    x.to.forEach(t=>h+='<span class="chip"><span class="cd" style="background:'+C[t[0]]+'"></span>'+CN[t[0]]+' · '+t[1]+'</span>');
+    h+='</div></div>';
+    return h;
+  }
+
+  document.getElementById('grid').innerHTML=cells.map(cellCard).join('');
+  document.getElementById('cxgrid').innerHTML=crosses.map(crossCard).join('');
+  document.getElementById('nAcc').textContent=cells.reduce((s,c)=>s+c.accts.length,0);
+  const d=new Date();
+  document.getElementById('stamp').textContent='actualizado '+d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  const tgl=document.getElementById('tgl');
+  tgl.addEventListener('click',()=>{
+    const on=document.body.classList.toggle('hl');
+    tgl.classList.toggle('on',on);
+    document.querySelectorAll('.cx').forEach((el,i)=>el.classList.toggle('hot',on||!!crosses[i].top));
+  });
+})();
+</script>
+</body>
+</html>
